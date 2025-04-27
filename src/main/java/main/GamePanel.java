@@ -1,5 +1,7 @@
 package main;
 
+import entity.Player;
+
 import javax.swing.*;
 import java.awt.*;
 
@@ -8,15 +10,11 @@ public class GamePanel extends JPanel implements Runnable{
     final int originalTileSize = 16;
     final int scale = 3;
 
-    final int tileSize = originalTileSize * scale;
+    public final int tileSize = originalTileSize * scale;
     final int maxScreenCol = 16;
     final int getMaxScreenRow = 12;
     final int screenWidth = tileSize * maxScreenCol;
     final int screenHeight = tileSize * getMaxScreenRow;
-
-    KeyHandler keyHandler = new KeyHandler();
-
-    Thread gameThread;
 
     int playerX = 100;
     int playerY = 100;
@@ -24,6 +22,11 @@ public class GamePanel extends JPanel implements Runnable{
 
     //FPS
     int FPS = 60;
+
+    KeyHandler keyHandler = new KeyHandler();
+
+    Thread gameThread;
+    Player player = new Player(this,keyHandler);
 
     public GamePanel(){
         this.setPreferredSize(new Dimension(screenWidth,screenHeight));
@@ -37,50 +40,35 @@ public class GamePanel extends JPanel implements Runnable{
         gameThread = new Thread(this);
         gameThread.start();
     }
+
     @Override
     public void run() {
         double drawInterval = (double) 1000000000/FPS; // 0.01666 seconds
-        double nextDrawTime = System.nanoTime() + drawInterval;
+        double delta = 0;
+        long lastTime = System.nanoTime();
+        long currentTime;
 
-        while(gameThread !=null){
-            update();
-            repaint();
-
-            try {
-                double remainingTime = nextDrawTime - System.nanoTime();
-                remainingTime = remainingTime/1000000;
-                if(remainingTime < 0){
-                    remainingTime = 0;
-                }
-
-                Thread.sleep((long) remainingTime);
-
-                nextDrawTime += drawInterval;
-
-            } catch (InterruptedException e) {
-                throw new RuntimeException(e);
+        while (gameThread != null){
+            currentTime = System.nanoTime();
+            delta += (currentTime - lastTime) / drawInterval;
+            lastTime = currentTime;
+            if(delta >= 1){
+                update();
+                repaint();
+                delta --;
             }
         }
     }
 
     public void update(){
-        if(keyHandler.upPressed){
-            playerY -= playerSpeed;
-        } else if(keyHandler.downPressed){
-            playerY += playerSpeed;
-        } else if (keyHandler.leftPressed){
-            playerX -= playerSpeed;
-        } else if (keyHandler.rightPressed){
-            playerX += playerSpeed;
-        }
+        player.update();
     }
 
     public void paintComponent(Graphics g){
         super.paintComponent(g);
 
         Graphics2D g2 = (Graphics2D)g;
-        g2.setColor(Color.white);
-        g2.fillRect(playerX,playerY, tileSize, tileSize);
+        player.draw(g2);
         g2.dispose();
     }
 }
