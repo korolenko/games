@@ -43,9 +43,8 @@ public class Player  extends Entity {
         try{
             return ImageIO.read(Objects.requireNonNull(getClass().getResourceAsStream(path)));
         }catch (IOException e){
-            e.printStackTrace();
+            throw  new RuntimeException("Unable to load resource: " + path);
         }
-        return null;
     }
 
     public void update(){
