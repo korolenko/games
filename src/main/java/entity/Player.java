@@ -2,6 +2,7 @@ package entity;
 
 import main.GamePanel;
 import main.KeyHandler;
+import main.UtilityTool;
 
 import javax.imageio.ImageIO;
 import java.awt.*;
@@ -43,22 +44,26 @@ public class Player  extends Entity {
     }
 
     public void getPlayerImage(){
-        up1 = getBufferedImage("/player/boy_up_1.png");
-        up2 = getBufferedImage("/player/boy_up_2.png");
-        down1 = getBufferedImage("/player/boy_down_1.png");
-        down2 = getBufferedImage("/player/boy_down_2.png");
-        left1 = getBufferedImage("/player/boy_left_1.png");
-        left2 = getBufferedImage("/player/boy_left_2.png");
-        right1 = getBufferedImage("/player/boy_right_1.png");
-        right2 = getBufferedImage("/player/boy_right_2.png");
+        up1 = setUp("boy_up_1");
+        up2 = setUp("boy_up_2");
+        down1 = setUp("boy_down_1");
+        down2 = setUp("boy_down_2");
+        left1 = setUp("boy_left_1");
+        left2 = setUp("boy_left_2");
+        right1 = setUp("boy_right_1");
+        right2 = setUp("boy_right_2");
     }
 
-    private BufferedImage getBufferedImage(String path){
-        try{
-            return ImageIO.read(Objects.requireNonNull(getClass().getResourceAsStream(path)));
-        }catch (IOException e){
-            throw  new RuntimeException("Unable to load resource: " + path);
+    public BufferedImage setUp(String imageName){
+        UtilityTool uTool = new UtilityTool();
+        BufferedImage scaledImage = null;
+        try {
+            scaledImage = ImageIO.read(getClass().getResourceAsStream("/player/" + imageName + ".png"));
+            scaledImage = uTool.scaleImage(scaledImage, gp.tileSize, gp.tileSize);
+        }catch (Exception e){
+            e.printStackTrace();
         }
+        return scaledImage;
     }
 
     public void update(){
@@ -188,7 +193,7 @@ public class Player  extends Entity {
             default:
                 throw new RuntimeException("Unknown direction: " + direction);
         }
-        g2.drawImage(image, screenX,screenY,gp.tileSize, gp.tileSize, null);
+        g2.drawImage(image, screenX,screenY, null);
     }
 
 
